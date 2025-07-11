@@ -1,3 +1,36 @@
+# LiteLLM v1.70.0 Proxy Dependencies
 litellm[proxy]==1.70.0
+
+# Core proxy dependencies
+anyio==4.8.0
+httpx==0.28.1
+openai==1.81.0
+fastapi==0.115.5
+backoff==2.2.1
+pyyaml==6.0.2
+uvicorn==0.29.0
+gunicorn==23.0.0
+uvloop==0.21.0
+redis==5.2.1
+prisma==0.11.0
+pynacl==1.5.0
+orjson==3.10.12
+apscheduler==3.10.4
+pyjwt[crypto]==2.9.0
+python-multipart==0.0.18
+cryptography==43.0.1
+tzdata==2025.1
+litellm-proxy-extras==0.2.9
+
+# Database dependencies
 psycopg2-binary
-prisma
+
+# Core LiteLLM dependencies
+python-dotenv==1.0.0
+tiktoken==0.8.0
+importlib-metadata==6.8.0
+tokenizers==0.20.2
+click==8.1.7
+rich==13.7.1
+jinja2==3.1.6
+aiohttp==3.10.2
