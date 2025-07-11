@@ -26,12 +26,13 @@ WORKDIR /app
 
 # Копирование собранных пакетов из этапа сборщика
 COPY --from=builder /app/wheels /wheels
+COPY --from=builder /app/requirements.txt .
 
 # Установка зависимостей из собранных пакетов
-RUN pip install --no-cache-dir --find-links /wheels -r /wheels/*.whl
+RUN pip install --no-cache-dir --find-links /wheels -r requirements.txt
 
 # Очистка временных файлов
-RUN rm -rf /wheels
+RUN rm -rf /wheels requirements.txt
 
 # Копирование файлов конфигурации
 COPY config.yaml /app/config.yaml
