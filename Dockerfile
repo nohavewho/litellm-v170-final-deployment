@@ -1,55 +1,33 @@
-# Многоэтапный Dockerfile для LiteLLM v1.70.0 Railway Deployment
-# Раздел 2.1: Финальный Dockerfile для фиксации версии
+# Простой Dockerfile для LiteLLM v1.70.0 Railway Deployment
+FROM python:3.11-slim
 
-# Этап 1: Сборщик
-# Используется конкретная версия Python для воспроизводимости
-FROM python:3.11-slim-bullseye AS builder
-
-# Установка переменных окружения для предотвращения интерактивных запросов
+# Установка переменных окружения
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-# Установка зависимостей для сборки
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Установка рабочей директории
 WORKDIR /app
-RUN pip install --upgrade pip
 
-# Копирование только файла requirements.txt для использования кэширования слоев Docker
+# Копирование и установка зависимостей
 COPY requirements.txt .
-
-# Установка зависимостей, включая конкретную версию litellm
-RUN pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements.txt
-
-# Этап 2: Финальный образ
-FROM python:3.11-slim-bullseye
-
-WORKDIR /app
-
-# Копирование собранных пакетов из этапа сборщика
-COPY --from=builder /app/wheels /wheels
-COPY --from=builder /app/requirements.txt .
-
-# Установка зависимостей из собранных пакетов
-RUN pip install --no-cache-dir --find-links /wheels -r requirements.txt
-
-# Очистка временных файлов
-RUN rm -rf /wheels requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование файлов конфигурации
-COPY config.yaml /app/config.yaml
-COPY entrypoint.sh /app/entrypoint.sh
+COPY config.yaml .
+COPY entrypoint.sh .
 
-# Создание непривилегированного пользователя для безопасности
-RUN groupadd -r litellm && useradd -r -g litellm litellm
+# Установка прав на выполнение
+RUN chmod +x entrypoint.sh
 
-# Установка прав доступа
-RUN chmod +x /app/entrypoint.sh && \
-    chown -R litellm:litellm /app
-
-# Переключение на непривилегированного пользователя
-USER litellm
-
-# Открытие порта 4000
+# Открытие порта
 EXPOSE 4000
 
 # Команда запуска
-CMD ["/app/entrypoint.sh"]
+CMD ["./entrypoint.sh"]
